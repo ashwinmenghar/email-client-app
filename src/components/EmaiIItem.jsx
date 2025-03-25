@@ -11,7 +11,9 @@ const EmailItem = ({ email, handleReadEmail, selected }) => {
           ? "border-[var(--accent)]"
           : "border-[var(--border)]"
       } w-full rounded-lg grid grid-cols-[auto,1fr] items-start px-10 py-3 mt-10 cursor-pointer ${
-        email.isFavorite ? "bg-[var(--real-background)]" : "bg-white"
+        email.isFavorite || email.isRead
+          ? "bg-[var(--real-background)]"
+          : "bg-white"
       }`}
       onClick={() => handleReadEmail(email)}
     >
