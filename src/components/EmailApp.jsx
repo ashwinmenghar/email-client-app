@@ -35,7 +35,6 @@ const EmailApp = () => {
       try {
         const res = await fetch(API_BASE_URL);
         const data = await res.json();
-        console.log(data);
 
         const newEmails = data.list.map((email) => ({
           ...email,
