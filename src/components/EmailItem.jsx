@@ -2,8 +2,6 @@ import React from "react";
 import { generateDate } from "../helper/helper";
 
 const EmailItem = ({ email, markEmailAsRead, selected }) => {
-  if (email?.hidden == true) return;
-
   return (
     <section
       className={`border ${
