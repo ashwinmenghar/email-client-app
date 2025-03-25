@@ -12,7 +12,7 @@ const EmailApp = () => {
   const [filterType, setFilterType] = useState("Unread");
 
   useEffect(() => {
-    if (!selectedEmail) {
+    if (!selectedEmail?.id || selectedEmail.body) {
       return;
     }
 
@@ -20,6 +20,7 @@ const EmailApp = () => {
       try {
         const res = await fetch(`${API_BASE_URL}?id=${selectedEmail?.id}`);
         const data = await res.json();
+
         setSelectedEmail((prev) => ({ ...prev, body: data.body }));
       } catch (error) {
         console.error("Failed to fetch email body:", error);
@@ -81,6 +82,10 @@ const EmailApp = () => {
 
   // Apply filtering using hidden property
   useEffect(() => {
+    if (!filterType) {
+      return;
+    }
+
     const filteredEmails = emailList.map((email) => {
       if (filterType === "Read") return { ...email, hidden: !email.isRead };
       if (filterType === "Unread") return { ...email, hidden: email.isRead };
@@ -91,6 +96,7 @@ const EmailApp = () => {
 
     setEmailList(filteredEmails);
     setSelectedEmail(null);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterType]);
 
@@ -122,7 +128,7 @@ const EmailApp = () => {
         {/* Loading Indicator */}
         {loading && <Loading loading={loading} />}
 
-        {/* Email Viewer (60% width) */}
+        {/* Email Viewer */}
         {!loading && selectedEmail && (
           <div className="w-3/5">
             <EmailViewer
