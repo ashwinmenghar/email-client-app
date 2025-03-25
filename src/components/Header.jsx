@@ -1,6 +1,6 @@
-const Header = ({ selectNav, setSelectNav }) => {
-  const buttons = ["Unread", "Read", "Favorites"];
+import { buttons } from "../constants/constants";
 
+const Header = ({ filterType, setFilterType }) => {
   return (
     <header>
       <nav className="flex gap-4">
@@ -9,11 +9,11 @@ const Header = ({ selectNav, setSelectNav }) => {
           <button
             key={index}
             className={`rounded-full px-3 text-md ${
-              selectNav === button
+              filterType === button
                 ? "bg-[var(--filter-btn)] border border-gray-300  font-light"
                 : ""
             }`}
-            onClick={() => setSelectNav(button)}
+            onClick={() => setFilterType(button)}
           >
             {button}
           </button>
