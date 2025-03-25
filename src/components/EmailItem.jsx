@@ -1,7 +1,7 @@
 import React from "react";
 import { generateDate } from "../helper/helper";
 
-const EmailItem = ({ email, handleReadEmail, selected }) => {
+const EmailItem = ({ email, markEmailAsRead, selected }) => {
   if (email?.hidden == true) return;
 
   return (
@@ -15,7 +15,7 @@ const EmailItem = ({ email, handleReadEmail, selected }) => {
           ? "bg-[var(--real-background)]"
           : "bg-white"
       }`}
-      onClick={() => handleReadEmail(email)}
+      onClick={() => markEmailAsRead(email)}
     >
       {/* Left: Avatar */}
       <div className="border text-3xl w-14 h-14 rounded-full flex justify-center items-center text-white bg-[var(--accent)]">
