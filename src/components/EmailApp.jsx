@@ -8,18 +8,17 @@ import { API_BASE_URL } from "../api/APIUtils";
 const EmailApp = () => {
   const [emailList, setEmailList] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedEmailId, setSelectedEmailId] = useState(null);
   const [selectedEmail, setSelectedEmail] = useState(null);
   const [filterType, setFilterType] = useState("Unread");
 
   useEffect(() => {
-    if (!selectedEmailId) {
+    if (!selectedEmail) {
       return;
     }
 
     const fetchSelectedData = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}?id=${selectedEmailId}`);
+        const res = await fetch(`${API_BASE_URL}?id=${selectedEmail?.id}`);
         const data = await res.json();
         setSelectedEmail((prev) => ({ ...prev, body: data.body }));
       } catch (error) {
@@ -28,7 +27,7 @@ const EmailApp = () => {
     };
 
     fetchSelectedData();
-  }, [selectedEmailId]);
+  }, [selectedEmail]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -60,7 +59,6 @@ const EmailApp = () => {
         prevEmail.id === email.id ? { ...prevEmail, isRead: true } : prevEmail
       )
     );
-    setSelectedEmailId(email.id);
     setSelectedEmail(email);
   };
 
@@ -92,7 +90,6 @@ const EmailApp = () => {
     });
 
     setEmailList(filteredEmails);
-    setSelectedEmailId(null);
     setSelectedEmail(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterType]);
@@ -117,7 +114,7 @@ const EmailApp = () => {
                 key={email.id}
                 email={email}
                 markEmailAsRead={markEmailAsRead}
-                selectedEmailId={selectedEmailId}
+                selectedEmail={selectedEmail}
               />
             ))}
         </div>

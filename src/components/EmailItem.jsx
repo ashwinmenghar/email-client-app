@@ -1,11 +1,11 @@
 import React from "react";
 import { generateDate } from "../helper/helper";
 
-const EmailItem = ({ email, markEmailAsRead, selected }) => {
+const EmailItem = ({ email, markEmailAsRead, selectedEmail }) => {
   return (
     <section
       className={`border ${
-        selected?.id === email.id
+        selectedEmail?.id == email.id
           ? "border-[var(--accent)]"
           : "border-[var(--border)]"
       } w-full rounded-lg grid grid-cols-[auto,1fr] items-start px-10 py-3 mt-10 cursor-pointer ${
