@@ -11,6 +11,7 @@ const EmailApp = () => {
   const [selectedEmail, setSelectedEmail] = useState(null);
   const [filterType, setFilterType] = useState("Unread");
 
+  // Fetch email by id
   useEffect(() => {
     if (!selectedEmail?.id || selectedEmail.body) {
       return;
@@ -30,6 +31,7 @@ const EmailApp = () => {
     fetchSelectedData();
   }, [selectedEmail]);
 
+  // Fetch emails
   useEffect(() => {
     const fetchData = async () => {
       try {
