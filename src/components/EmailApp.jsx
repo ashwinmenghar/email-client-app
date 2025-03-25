@@ -1,70 +1,68 @@
 import { useEffect, useState } from "react";
-import EmailItem from "./EmaiIItem";
+import EmailItem from "./EmailItem";
 import Header from "./Header";
 import EmailViewer from "./EmailViewer";
 import Loading from "./Loading";
+import { API_BASE_URL } from "../api/APIUtils";
 
 const EmailApp = () => {
   const [emailList, setEmailList] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState();
+  const [selectedEmailId, setSelectedEmailId] = useState(null);
   const [selectedEmail, setSelectedEmail] = useState(null);
-  const [selectNav, setSelectNav] = useState("Unread");
+  const [filterType, setFilterType] = useState("Unread");
 
   useEffect(() => {
-    if (!selected) return;
+    if (!selectedEmailId) {
+      return;
+    }
 
-    const fetchSelectedData = async (email) => {
-      const res = await fetch(
-        `https://flipkart-email-mock.now.sh/?id=${email?.id}`
-      );
-      const data = await res.json();
-      setSelectedEmail({ ...email, body: data.body });
-    };
-
-    fetchSelectedData(selected);
-  }, [selected]);
-
-  useEffect(() => {
-    const fetchData = async (page) => {
+    const fetchSelectedData = async () => {
       try {
-        const res = await fetch(
-          `https://flipkart-email-mock.now.sh/?page=${page}`
-        );
+        const res = await fetch(`${API_BASE_URL}?id=${selectedEmailId}`);
         const data = await res.json();
-        const newRes = data?.list?.map((res) => {
-          return { ...res, ...{ isRead: false, isFavorite: false } };
-        });
-
-        setEmailList(newRes);
-        setLoading(false);
+        setSelectedEmail((prev) => ({ ...prev, body: data.body }));
       } catch (error) {
-        console.log(error);
+        console.error("Failed to fetch email body:", error);
       }
     };
-    fetchData(1);
-  }, []);
+
+    fetchSelectedData();
+  }, [selectedEmailId]);
 
   useEffect(() => {
-    if (!selectNav) return;
+    const fetchData = async () => {
+      try {
+        const res = await fetch(API_BASE_URL);
+        const data = await res.json();
+        console.log(data);
 
-    setSelectedEmail(null);
-    setSelected(null);
+        const newEmails = data.list.map((email) => ({
+          ...email,
+          isRead: false,
+          isFavorite: false,
+        }));
 
-    setEmailList((prevEmails) => {
-      return prevEmails.map((email) => {
-        if (selectNav === "Read") {
-          return { ...email, hidden: !email.isRead };
-        } else if (selectNav === "Unread") {
-          return { ...email, hidden: email.isRead };
-        } else if (selectNav === "Favorites") {
-          return { ...email, hidden: !email.isFavorite };
-        } else {
-          return { ...email, hidden: false };
-        }
-      });
-    });
-  }, [selectNav]);
+        setEmailList(newEmails);
+        setLoading(false);
+      } catch (error) {
+        console.error("Failed to fetch emails:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Function to mark an email as read
+  const markEmailAsRead = (email) => {
+    setEmailList((prevEmails) =>
+      prevEmails.map((prevEmail) =>
+        prevEmail.id === email.id ? { ...prevEmail, isRead: true } : prevEmail
+      )
+    );
+    setSelectedEmailId(email.id);
+    setSelectedEmail(email);
+  };
 
   // Function to toggle favorite status
   const toggleFavorite = (emailId) => {
@@ -76,39 +74,52 @@ const EmailApp = () => {
       )
     );
 
-    if (selectedEmail?.id === emailId) {
-      setSelectedEmail((prev) => ({ ...prev, isFavorite: !prev.isFavorite }));
-    }
+    setSelectedEmail((prev) =>
+      prev && prev.id === emailId
+        ? { ...prev, isFavorite: !prev.isFavorite }
+        : prev
+    );
   };
 
-  //
-  const handleReadEmail = (email) => {
-    setEmailList((prevEmails) =>
-      prevEmails.map((prevEmail) =>
-        prevEmail.id === email.id ? { ...prevEmail, isRead: true } : prevEmail
-      )
-    );
-    setSelected(email);
-  };
+  // Apply filtering using hidden property
+  useEffect(() => {
+    const filteredEmails = emailList.map((email) => {
+      if (filterType === "Read") return { ...email, hidden: !email.isRead };
+      if (filterType === "Unread") return { ...email, hidden: email.isRead };
+      if (filterType === "Favorites")
+        return { ...email, hidden: !email.isFavorite };
+      return { ...email, hidden: false };
+    });
+
+    setEmailList(filteredEmails);
+    setSelectedEmailId(null);
+    setSelectedEmail(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterType]);
 
   return (
     <div className="container mt-10 mx-auto">
-      {/* Headers */}
-      <Header selectNav={selectNav} setSelectNav={setSelectNav} />
-      {/* List of email */}
+      {/* Header */}
+      <Header filterType={filterType} setFilterType={setFilterType} />
+
+      {/* Main Content */}
       <main
-        className={`flex gap-10 w-full ${selected ? "" : "justify-center"}`}
+        className={`flex gap-10 w-full ${
+          selectedEmail ? "" : "justify-center"
+        }`}
       >
-        {/* Email List (40% width) */}
-        <div className={`${selected ? "w-2/5" : "w-full"} mb-24`}>
-          {emailList?.map((email) => (
-            <EmailItem
-              key={email.id}
-              email={email}
-              handleReadEmail={handleReadEmail}
-              selected={selected}
-            />
-          ))}
+        {/* Email List */}
+        <div className={`${selectedEmail ? "w-2/5" : "w-full"} mb-24`}>
+          {emailList
+            .filter((email) => !email.hidden) // Only render visible emails
+            .map((email) => (
+              <EmailItem
+                key={email.id}
+                email={email}
+                markEmailAsRead={markEmailAsRead}
+                selectedEmailId={selectedEmailId}
+              />
+            ))}
         </div>
 
         {/* Loading Indicator */}
