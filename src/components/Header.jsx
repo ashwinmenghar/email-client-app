@@ -1,6 +1,6 @@
 import { buttons } from "../constants/constants";
 
-const Header = ({ filterType, setFilterType }) => {
+const Header = ({ filterType, handleFilterChange }) => {
   return (
     <header>
       <nav className="flex gap-4">
@@ -13,7 +13,7 @@ const Header = ({ filterType, setFilterType }) => {
                 ? "bg-[var(--filter-btn)] border border-gray-300  font-light"
                 : ""
             }`}
-            onClick={() => setFilterType(button)}
+            onClick={() => handleFilterChange(button)}
           >
             {button}
           </button>

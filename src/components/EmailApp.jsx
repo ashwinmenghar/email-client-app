@@ -4,32 +4,14 @@ import Header from "./Header";
 import EmailViewer from "./EmailViewer";
 import Loading from "./Loading";
 import { API_BASE_URL } from "../api/APIUtils";
+import Error from "./Error";
 
 const EmailApp = () => {
   const [emailList, setEmailList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedEmail, setSelectedEmail] = useState(null);
   const [filterType, setFilterType] = useState("Unread");
-
-  // Fetch email by id
-  useEffect(() => {
-    if (!selectedEmail?.id || selectedEmail.body) {
-      return;
-    }
-
-    const fetchSelectedData = async () => {
-      try {
-        const res = await fetch(`${API_BASE_URL}?id=${selectedEmail?.id}`);
-        const data = await res.json();
-
-        setSelectedEmail((prev) => ({ ...prev, body: data.body }));
-      } catch (error) {
-        console.error("Failed to fetch email body:", error);
-      }
-    };
-
-    fetchSelectedData();
-  }, [selectedEmail]);
+  const [error, setError] = useState(null);
 
   // Fetch emails
   useEffect(() => {
@@ -46,13 +28,26 @@ const EmailApp = () => {
 
         setEmailList(newEmails);
         setLoading(false);
+        setError(null);
       } catch (error) {
-        console.error("Failed to fetch emails:", error);
+        setError(error.message || "Something went wrong");
       }
     };
 
     fetchData();
   }, []);
+
+  // Fetch email by id
+  const fetchSelectedData = async (email) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}?id=${email?.id}`);
+      const data = await res.json();
+
+      setSelectedEmail((prev) => ({ ...prev, body: data.body }));
+    } catch (error) {
+      console.error("Failed to fetch email body:", error);
+    }
+  };
 
   // Function to mark an email as read
   const markEmailAsRead = (email) => {
@@ -62,6 +57,7 @@ const EmailApp = () => {
       )
     );
     setSelectedEmail(email);
+    fetchSelectedData(email);
   };
 
   // Function to toggle favorite status
@@ -82,29 +78,28 @@ const EmailApp = () => {
   };
 
   // Apply filtering using hidden property
-  useEffect(() => {
-    if (!filterType) {
-      return;
-    }
-
+  const handleFilterChange = (filter) => {
     const filteredEmails = emailList.map((email) => {
-      if (filterType === "Read") return { ...email, hidden: !email.isRead };
-      if (filterType === "Unread") return { ...email, hidden: email.isRead };
-      if (filterType === "Favorites")
+      if (filter === "Read") return { ...email, hidden: !email.isRead };
+      if (filter === "Unread") return { ...email, hidden: email.isRead };
+      if (filter === "Favorites")
         return { ...email, hidden: !email.isFavorite };
       return { ...email, hidden: false };
     });
 
     setEmailList(filteredEmails);
+    setFilterType(filter);
     setSelectedEmail(null);
+  };
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterType]);
+  if (error) {
+    return <Error error={error} />;
+  }
 
   return (
     <div className="container mt-10 mx-auto">
       {/* Header */}
-      <Header filterType={filterType} setFilterType={setFilterType} />
+      <Header filterType={filterType} handleFilterChange={handleFilterChange} />
 
       {/* Main Content */}
       <main
