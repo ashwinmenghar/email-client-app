@@ -43,7 +43,7 @@ const EmailApp = () => {
       const res = await fetch(`${API_BASE_URL}?id=${email?.id}`);
       const data = await res.json();
 
-      setSelectedEmail((prev) => ({ ...prev, body: data.body }));
+      setSelectedEmail({ ...email, body: data.body });
     } catch (error) {
       console.error("Failed to fetch email body:", error);
     }
@@ -56,7 +56,7 @@ const EmailApp = () => {
         prevEmail.id === email.id ? { ...prevEmail, isRead: true } : prevEmail
       )
     );
-    setSelectedEmail(email);
+    // setSelectedEmail(email);
     fetchSelectedData(email);
   };
 
